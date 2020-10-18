@@ -1,0 +1,25 @@
+name: auto-deploy-to-lambda-master
+
+on:
+  push:
+    branches:
+      - master
+    paths: lambda-s3-operation-test/*
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: chmod u+x *
+      - run: zip -rj /tmp/function.zip ./lambda-s3-operation-test/
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8.2
+
+      - run: pip3 install awscli
+      - run: aws lambda update-function-code --function-name lambda-s3-operation-test --zip-file fileb:///tmp/function.zip --publish
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ap-northeast-1
